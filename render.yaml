@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: blockfolding
+    runtime: docker
+    repo: https://github.com/psyberchasers/blockfolding
+    branch: main
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: ETH_RPC_URL
+        sync: false
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: blockfolding-data
+      mountPath: /app/artifacts
+      sizeGB: 10
+    healthCheckPath: /healthz

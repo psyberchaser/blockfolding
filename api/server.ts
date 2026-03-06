@@ -322,8 +322,20 @@ app.use(
 app.use(express.json({ limit: '1mb' }));
 app.use('/fonts', express.static(path.resolve(process.cwd(), 'public/fonts')));
 
-// Redirect root to trading bot
-app.get('/', (_req, res) => res.redirect('/trading-bot'));
+// Serve validator UI static files in production
+const uiDistPath = path.resolve(process.cwd(), 'validator-ui/dist');
+if (existsSync(uiDistPath)) {
+  app.use(express.static(uiDistPath));
+}
+
+// Redirect root to validator UI (or fallback SPA)
+app.get('/', (_req, res) => {
+  if (existsSync(path.join(uiDistPath, 'index.html'))) {
+    res.sendFile(path.join(uiDistPath, 'index.html'));
+  } else {
+    res.redirect('/trading-bot');
+  }
+});
 
 app.get('/healthz', (_req, res) => {
   const summary = getLatestBlockSummary();
@@ -7629,6 +7641,16 @@ app.get('/validator/benchmark/real', async (req, res) => {
     });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+// SPA fallback: serve index.html for non-API routes
+app.get('*', (_req, res) => {
+  const indexPath = path.join(uiDistPath, 'index.html');
+  if (existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).json({ error: 'Not found' });
   }
 });
 
