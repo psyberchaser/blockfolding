@@ -7310,7 +7310,7 @@ app.post('/validator/ingest/trigger', async (req, res) => {
   const { chain = 'eth', count = 10, startBlock } = req.body;
   ingestCancelled = false;
   try {
-    const ingested = await ingestBlocks(chain, Math.min(count, 500), startBlock);
+    const ingested = await ingestBlocks(chain, Math.min(count, 5000), startBlock);
     res.json({ ingested });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
