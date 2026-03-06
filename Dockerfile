@@ -11,8 +11,8 @@ RUN npx tsc -p tsconfig.json --noEmitOnError false || true
 FROM node:22-alpine AS build-ui
 WORKDIR /app/validator-ui
 RUN apk add --no-cache python3 make g++
-COPY validator-ui/package*.json ./
-RUN npm ci && npm install @rollup/rollup-linux-x64-musl @esbuild/linux-x64 lightningcss-linux-x64-musl 2>/dev/null || true
+COPY validator-ui/package.json ./
+RUN rm -f package-lock.json && npm install
 COPY validator-ui/ ./
 RUN npx vite build
 
