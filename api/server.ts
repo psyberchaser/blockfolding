@@ -7203,6 +7203,50 @@ app.get('/validator/meta-blocks', (_req, res) => {
   });
 });
 
+// POST /validator/meta-blocks/rebuild - Rebuild pattern index from ingested blocks
+app.post('/validator/meta-blocks/rebuild', (_req, res) => {
+  try {
+    const realBlocks = loadIngestedBlocks();
+    // Rebuild address index
+    const indexStart = performance.now();
+    addressIndex.clear();
+    let txTotal = 0;
+    const blocksDir = path.join(DEFAULT_DATA_DIR, 'blocks');
+    if (existsSync(blocksDir)) {
+      for (const chain of readdirSync(blocksDir)) {
+        const chainDir = path.join(blocksDir, chain);
+        try { if (!statSync(chainDir).isDirectory()) continue; } catch { continue; }
+        for (const h of readdirSync(chainDir)) {
+          const rawPath = path.join(chainDir, h, 'raw-block.json');
+          if (!existsSync(rawPath)) continue;
+          try {
+            const raw = JSON.parse(readFileSync(rawPath, 'utf-8'));
+            const txs = raw.transactions || [];
+            const height = raw.header?.height || parseInt(h, 10);
+            txTotal += txs.length;
+            for (const tx of txs) {
+              if (tx.sender) { const a = tx.sender.toLowerCase(); if (!addressIndex.has(a)) addressIndex.set(a, new Set()); addressIndex.get(a)!.add(height); }
+              if (tx.receiver) { const a = tx.receiver.toLowerCase(); if (!addressIndex.has(a)) addressIndex.set(a, new Set()); addressIndex.get(a)!.add(height); }
+            }
+          } catch { /* skip */ }
+        }
+      }
+    }
+    addressIndexBuildTimeMs = performance.now() - indexStart;
+    cachedAddressCount = addressIndex.size;
+    cachedTransactionCount = txTotal;
+    addressIndexReady = true;
+    if (realBlocks.length > 0) {
+      cachedMetaBlockIndex = generateMetaBlocks(realBlocks, 2);
+      validatorNetwork.loadPatternIndex(cachedMetaBlockIndex);
+      patternIndexLoaded = true;
+    }
+    res.json({ rebuilt: true, blocks: realBlocks.length, addresses: cachedAddressCount, transactions: cachedTransactionCount, metaBlocks: cachedMetaBlockIndex?.totalMetaBlocks ?? 0 });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ---- INGESTION ENDPOINTS ----
 
 // SSE clients for live ingest events
