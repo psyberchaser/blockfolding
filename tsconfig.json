@@ -12,6 +12,6 @@
     "rootDir": "."
   },
   "include": ["**/*.ts"],
-  "exclude": ["node_modules", "dist", "dashboard"]
+  "exclude": ["node_modules", "dist", "validator-ui"]
 }
 

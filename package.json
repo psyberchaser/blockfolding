@@ -1,7 +1,7 @@
 {
-  "name": "yysfold",
-  "version": "0.1.0",
-  "description": "Block folding plus zk scaffolding prototype",
+  "name": "blockfolding",
+  "version": "1.0.0",
+  "description": "Pattern-based block compression and validator architecture (USPTO 63/906,240)",
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -15,7 +15,6 @@
     "codebook:train": "npm run build && node dist/scripts/trainCodebook.js",
     "ingest": "npm run build && node dist/scripts/ingestBlocks.js",
     "ingest:watch": "npm run build && node dist/scripts/watchIngest.js",
-    "ingest:financial": "npm run build && node dist/scripts/ingestFinancial.js",
     "metrics:backfill": "npm run build && node dist/scripts/backfillMetrics.js",
     "atlas:build": "npm run build && node dist/scripts/buildAtlas.js"
   },

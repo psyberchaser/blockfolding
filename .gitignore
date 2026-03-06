@@ -17,7 +17,6 @@ artifacts/halo2-*.json
 # Keep codebooks
 !artifacts/codebooks/
 halo2/target/
-six-eyes/target/
 
 # LaTeX aux files
 *.aux
