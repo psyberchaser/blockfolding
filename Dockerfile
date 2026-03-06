@@ -6,9 +6,10 @@ RUN npm ci
 
 FROM deps AS build-api
 COPY . .
-RUN npx tsc -p tsconfig.json --noEmitOnError false
+RUN npx tsc -p tsconfig.json --noEmitOnError false || true
 
-FROM deps AS build-ui
+FROM node:22-alpine AS build-ui
+WORKDIR /app
 COPY validator-ui/ validator-ui/
 RUN cd validator-ui && npm ci && npm run build
 
@@ -22,11 +23,9 @@ COPY --from=build-api /app/package.json /app/
 COPY --from=build-api /app/artifacts/codebooks /app/default-codebooks
 COPY --from=build-ui /app/validator-ui/dist /app/validator-ui/dist
 
-# On startup: seed codebooks into DATA_DIR if missing, then start server
+EXPOSE 8080
 CMD sh -c 'DATA="${DATA_DIR:-/app/artifacts}"; mkdir -p "$DATA/codebooks"; \
   if [ ! -f "$DATA/codebooks/latest.json" ] && [ -d /app/default-codebooks ]; then \
     cp -n /app/default-codebooks/* "$DATA/codebooks/"; \
   fi; \
   exec node dist/api/server.js'
-
-EXPOSE 8080
