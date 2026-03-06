@@ -19,8 +19,14 @@ RUN apk add --no-cache libstdc++
 COPY --from=build-api /app/dist /app/dist
 COPY --from=build-api /app/node_modules /app/node_modules
 COPY --from=build-api /app/package.json /app/
-COPY --from=build-api /app/artifacts/codebooks /app/artifacts/codebooks
+COPY --from=build-api /app/artifacts/codebooks /app/default-codebooks
 COPY --from=build-ui /app/validator-ui/dist /app/validator-ui/dist
 
+# On startup: seed codebooks into DATA_DIR if missing, then start server
+CMD sh -c 'DATA="${DATA_DIR:-/app/artifacts}"; mkdir -p "$DATA/codebooks"; \
+  if [ ! -f "$DATA/codebooks/latest.json" ] && [ -d /app/default-codebooks ]; then \
+    cp -n /app/default-codebooks/* "$DATA/codebooks/"; \
+  fi; \
+  exec node dist/api/server.js'
+
 EXPOSE 8080
-CMD ["node", "dist/api/server.js"]
