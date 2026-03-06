@@ -9,9 +9,12 @@ COPY . .
 RUN npx tsc -p tsconfig.json --noEmitOnError false || true
 
 FROM node:22-alpine AS build-ui
-WORKDIR /app
-COPY validator-ui/ validator-ui/
-RUN cd validator-ui && npm ci && npm run build
+WORKDIR /app/validator-ui
+RUN apk add --no-cache python3 make g++
+COPY validator-ui/package*.json ./
+RUN npm ci
+COPY validator-ui/ ./
+RUN npx vite build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
