@@ -1,0 +1,27 @@
+node_modules/
+.next/
+.env
+.env.*
+*.pem
+.DS_Store
+artifacts/blocks/
+artifacts/halo2-workspace/
+artifacts/*.db
+artifacts/atlas/
+artifacts/training/
+artifacts/mempool/
+artifacts/tmp-*
+artifacts/*.bin
+artifacts/pipeline-*.json
+artifacts/halo2-*.json
+# Keep codebooks
+!artifacts/codebooks/
+halo2/target/
+six-eyes/target/
+
+# LaTeX aux files
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
